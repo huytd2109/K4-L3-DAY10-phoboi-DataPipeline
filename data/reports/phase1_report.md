@@ -7,7 +7,7 @@
 | `source` | Crossref REST API |
 | `raw_records` | 24 |
 | `clean_records` | 24 |
-| `test_samples` | 5 |
+| `test_samples` | 10 |
 | `embedding_model` | sentence-transformers/all-MiniLM-L6-v2 |
 | `collection` | papers-baseline |
 
@@ -15,7 +15,7 @@
 
 | Metric | Value |
 |---|---:|
-| `samples` | 5 |
+| `samples` | 10 |
 | `retrieval_hit_rate` | 1.0000 |
 | `mean_token_f1` | 1.0000 |
 | `judge_accuracy` | 1.0000 |

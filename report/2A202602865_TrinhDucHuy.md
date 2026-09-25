@@ -19,7 +19,7 @@
 | Module/deliverable | File/hàm phụ trách | Input nhận vào | Output bàn giao | Trạng thái |
 |---|---|---|---|---|
 | Cleaning và clean schema | `src/ingestion/cleaning.py` — `build_clean_dataframe()` | Raw records và `run_date` | Clean DataFrame, được pipeline lưu thành `data/clean/papers_clean.csv` và `.json` | Hoàn thành theo báo cáo nhóm |
-| Benchmark set | `src/evaluation/testset.py` — `build_test_set()`, `load_or_create_test_set()` | Clean DataFrame | `data/eval/test_set.json` gồm 5 câu và DOI ground truth | Hoàn thành theo báo cáo nhóm |
+| Benchmark set | `src/evaluation/testset.py` — `build_test_set()`, `load_or_create_test_set()` | Clean DataFrame | `data/eval/test_set.json` gồm 10 câu và DOI ground truth | Hoàn thành theo báo cáo nhóm |
 
 Theo phân công trong `group_report.md`, tôi nhận dữ liệu từ phần ingestion của Đỗ Quốc An, chuẩn hóa để bàn giao cho observability của Trịnh Hoàng Tùng, corruption/repair của Nguyễn Việt Dũng và pipeline/index của Nguyễn Hoàng Sơn. Phạm vi chính của tôi là cleaning, clean schema và test set; kết quả end-to-end là kết quả chung của nhóm.
 
@@ -38,7 +38,7 @@ Theo phân công trong `group_report.md`, tôi nhận dữ liệu từ phần in
 |---|---|---|---|
 | Chuẩn hóa văn bản, DOI và ngày | `src/ingestion/cleaning.py` | 24 bản ghi sạch, 24 DOI duy nhất | Đối chiếu mã nguồn và `data/clean/papers_clean.json` |
 | Tạo trường phục vụ embedding và quality | `build_clean_dataframe()` | `text_for_embedding`, `age_days`, `summary_chars` | Đối chiếu clean schema và quality/freshness artifacts |
-| Xây dựng evaluation set | `data/eval/test_set.json` | 5 loại: summary, authors, date, category, multi_hop | Kiểm tra loại câu và DOI tham chiếu |
+| Xây dựng evaluation set | `data/eval/test_set.json` | 10 câu thuộc 4 loại: summary, authors, date, categories | Kiểm tra loại câu và DOI tham chiếu |
 | Hỗ trợ repair bằng cleaning dùng chung | `data/clean/papers_clean_repaired.json` | Dữ liệu repaired trùng clean | So sánh nội dung hai artifact |
 
 Output cụ thể là bộ test gồm 5 mẫu, mỗi mẫu có `id`, `type`, `question_type`, `question`, `ground_truth` và `ground_truth_doc_ids`. Câu multi-hop tham chiếu hai tài liệu; các câu còn lại tham chiếu một tài liệu. Mọi DOI ground truth đều tồn tại trong tập clean hiện có.
@@ -77,7 +77,7 @@ uv run python script/run_corruption_flow.py
 ```
 
 - **Kết quả mong đợi:** Clean schema hợp lệ; DOI ground truth thuộc tập clean; cùng test set cho ba trạng thái; repaired khôi phục clean.
-- **Kết quả thực tế:** Artifacts hiện có chứa 24 DOI duy nhất, 5 câu hỏi với DOI hợp lệ; clean và repaired trùng nội dung. Báo cáo nhóm ghi nhận hai pipeline exit code 0.
+- **Kết quả thực tế:** Artifacts hiện có chứa 24 DOI duy nhất, 10 câu hỏi với DOI hợp lệ; clean và repaired trùng nội dung. Hai pipeline đã chạy lại với exit code 0.
 - **Artifact/log:** `data/clean/`, `data/eval/test_set.json`, `data/results/*_metrics.json`, `data/quality/`.
 
 ## 5. Một quyết định kỹ thuật quan trọng
@@ -128,7 +128,7 @@ Báo cáo nhóm không ghi nhận lỗi lập trình riêng do tôi xử lý. T�
 | Quality checks | Pass | Fail | Pass | Phát hiện summary không đạt và DOI trùng |
 | Freshness status | Pass | Fail | Pass | Stale ratio: 4.17% → 29.17% → 4.17% |
 
-Số liệu là kết quả chung của nhóm với 24 bản ghi, 5 câu hỏi và `top_k=4`. Lượt xác minh cuối dùng `LLM_PROVIDER=mock`, judge dùng heuristic fallback; Ragas chưa chạy. Chưa thể suy rộng thành chất lượng của hệ thống dùng LLM thật.
+Số liệu là kết quả chung của nhóm với 24 bản ghi, 10 câu hỏi và `top_k=4`. Lượt xác minh cuối dùng `LLM_PROVIDER=mock`, judge dùng heuristic fallback; Ragas chưa chạy. Chưa thể suy rộng thành chất lượng của hệ thống dùng LLM thật.
 
 ### Kết luận từ số liệu
 
@@ -153,7 +153,7 @@ Kết quả nào khác với kỳ vọng ban đầu?
 
 ### Nếu có thêm thời gian
 
-Mở rộng benchmark lên ít nhất 20 câu, phân bổ theo 5 loại và nhiều tài liệu hơn; bổ sung cách hỏi diễn đạt lại thay vì chỉ dùng đúng tiêu đề. Giữ nguyên benchmark cho ba trạng thái, đo metric từng loại và thử từng corruption riêng để xác định mức suy giảm do mỗi lỗi. Đây là cải thiện đề xuất, chưa triển khai.
+Mở rộng benchmark lên ít nhất 20 câu, phân bổ theo bốn loại bắt buộc và nhiều tài liệu hơn; bổ sung cách hỏi diễn đạt lại thay vì chỉ dùng đúng tiêu đề. Giữ nguyên benchmark cho ba trạng thái, đo metric từng loại và thử từng corruption riêng để xác định mức suy giảm do mỗi lỗi. Đây là cải thiện đề xuất, chưa triển khai.
 
 ## 10. Cam kết của thành viên
 

@@ -1,58 +1,60 @@
 # Danh Sách Thành Viên & Báo Cáo Phân Công Nhóm
 
-- **Tên Nhóm:** `[Điền tên nhóm]`
+- **Tên Nhóm:** `phoboi`
 - **Mã Nhóm / Lớp:** `K4-L3-DAY10`
-- **Tên Repository Nộp Bài:** `K4-L3-DAY10-TenNhom-DataPipeline`
+- **Tên Repository Nộp Bài:** `K4-L3-DAY10-phoboi-DataPipeline`
+- **Repository:** `https://github.com/huytd2109/K4-L3-DAY10-phoboi-DataPipeline`
 
----
+## Thành viên
 
-## # Thành viên
+| STT | Họ và tên | MSSV | Vai trò & Phân công công việc | Báo cáo cá nhân |
+|---:|---|---|---|---|
+| 1 | Đỗ Quốc An | 2A202602892 | Source owner: `crossref.py`, raw response, raw records và data lineage | `report/2A202602892_DoQuocAn.md` |
+| 2 | Trịnh Đức Huy | 2A202602865 | Cleaning & test-set owner: `cleaning.py`, `testset.py`, clean schema và benchmark 10 câu | `report/2A202602865_TrinhDucHuy.md` |
+| 3 | Trịnh Hoàng Tùng | 2A202602937 | Observability & reporting owner: `quality.py`, `reporting.py`, GX 1.x và Freshness SLA | `report/2A202602937_TrinhHoangTung.md` |
+| 4 | Nguyễn Việt Dũng | 2A202602533 | Corruption & repair owner: `corruption.py`, corrupted/repaired datasets và corruption log | `report/2A202602533_NguyenVietDung.md` |
+| 5 | Nguyễn Hoàng Sơn | 2A202602457 | Pipeline integration & evidence owner: `phase1.py`, `corruption_flow.py`, ChromaDB, metrics và kiểm chứng end-to-end | `report/2A202602457_NguyenHoangSon.md` |
 
-| STT | Họ và tên | MSSV | Email | Vai trò & Phân công công việc | Báo cáo cá nhân |
-|---:|---|---|---|---|---|
-| 1 | | | | Trưởng nhóm / Pipeline Integrator (`core/`, `phase1.py`, `corruption_flow.py`) | `report/<MSSV1>_HoTen.md` |
-| 2 | | | | Data Foundation & Recovery (`crossref.py`, `cleaning.py`, raw data) | `report/<MSSV2>_HoTen.md` |
-| 3 | | | | RAG & Vector Index (`retrieval/index.py`, `embeddings.py`, ChromaDB) | `report/<MSSV3>_HoTen.md` |
-| 4 | | | | Observability & Evaluation (`quality.py` GX 1.x, `testset.py`, reporting) | `report/<MSSV4>_HoTen.md` |
+## Tự khai đóng góp cá nhân
 
-*(Nếu nhóm có 3 hoặc 5-6 thành viên, xem bảng phân công chi tiết theo vai trò trong file `CHECKPOINTS.md`)*.
+### Đỗ Quốc An — 2A202602892
 
----
+- **Vai trò:** Source owner.
+- **Phần việc:** Parse Crossref payload, loại JATS/XML, chuẩn hóa DOI/tác giả/ngày, retry API và fallback snapshot offline.
+- **Đầu ra:** `data/raw/crossref_response.json`, `data/raw/crossref_records.json` gồm 24 bản ghi.
+- **Cách xác minh:** Kiểm tra raw artifacts và chạy lệnh ingestion trong `docs/CHECKPOINTS.md`.
 
-## # Cá nhân
+### Trịnh Đức Huy — 2A202602865
 
-### ## HoVaTen1-MSSV1
-- **Vai trò:** Trưởng nhóm & Điều phối Pipeline.
-- **Công việc chi tiết đã hoàn thành:**
-  - Thiết lập cấu hình hệ thống `core/config.py` và đường dẫn artifacts `core/utils.py`.
-  - Kết nối luồng thực thi trong `src/pipelines/phase1.py` và `src/pipelines/corruption_flow.py`.
-  - Kiểm tra tính nhất quán của các artifacts và theo dõi Contributor tracking trên GitHub nhánh `main`.
-- **Điều học được / Đóng góp chính:**
-  - Hiểu sâu sắc về thiết kế Idempotent Pipeline và quản lý trạng thái luồng dữ liệu đa tầng.
+- **Vai trò:** Cleaning & test-set owner.
+- **Phần việc:** Chuẩn hóa clean schema, tính `age_days`, tạo `text_for_embedding`, khử trùng lặp và xây dựng benchmark 10 câu thuộc bốn loại bắt buộc.
+- **Đầu ra:** `data/clean/papers_clean.csv`, `data/clean/papers_clean.json`, `data/eval/test_set.json`.
+- **Cách xác minh:** Clean data có 24 DOI duy nhất; test set có 10 câu thuộc `summary`, `authors`, `date`, `categories`.
 
-### ## HoVaTen2-MSSV2
-- **Vai trò:** Phụ trách Ingestion, Làm sạch & Phục hồi dữ liệu.
-- **Công việc chi tiết đã hoàn thành:**
-  - Xây dựng module thu thập Crossref API với cơ chế Fallback offline trong `src/ingestion/crossref.py`.
-  - Chuẩn hóa schema, tính toán trường `age_days` và `text_for_embedding` trong `src/ingestion/cleaning.py`.
-  - Thực thi cơ chế Idempotent Repair phục hồi dữ liệu từ raw snapshot.
-- **Điều học được / Đóng góp chính:**
-  - Kỹ thuật truy vết nguồn gốc dữ liệu (Data Lineage) và bảo toàn raw snapshot trước khi biến đổi.
+### Trịnh Hoàng Tùng — 2A202602937
 
-### ## HoVaTen3-MSSV3
-- **Vai trò:** Phụ trách RAG, Vector Database & Embedding.
-- **Công việc chi tiết đã hoàn thành:**
-  - Quản lý mô hình embedding `sentence-transformers/all-MiniLM-L6-v2`.
-  - Nạp và quản lý 3 collection riêng biệt trong ChromaDB (`papers-baseline`, `papers-corrupted`, `papers-repaired`).
-  - Xây dựng QA Agent truy vấn ngữ cảnh chính xác theo tài liệu.
-- **Điều học được / Đóng góp chính:**
-  - Cách cô lập các không gian vector để so sánh khách quan giữa dữ liệu sạch và dữ liệu bị lỗi.
+- **Vai trò:** Observability & reporting owner.
+- **Phần việc:** Xây dựng sáu GX validations, Freshness SLA và báo cáo Markdown từ artifacts thực tế.
+- **Đầu ra:** Các JSON trong `data/quality/` và hai báo cáo trong `data/reports/`.
+- **Cách xác minh:** Quality/Freshness thể hiện chuỗi Pass → Fail → Pass.
 
-### ## HoVaTen4-MSSV4
-- **Vai trò:** Phụ trách Data Observability & Benchmark Evaluation.
-- **Công việc chi tiết đã hoàn thành:**
-  - Thiết lập Quality Gate theo chuẩn mới **Great Expectations 1.x** và giám sát Freshness SLA trong `src/observability/quality.py`.
-  - Xây dựng bộ câu hỏi đánh giá chuẩn trong `src/evaluation/testset.py`.
-  - Đo lường và xuất bảng đối chiếu 3 trạng thái vào `data/reports/corruption_report.md`.
-- **Điều học được / Đóng góp chính:**
-  - Cách thiết lập hệ thống cảnh báo sớm chặn đứng hiện tượng Silent Failure trước khi dữ liệu vào serving layer.
+### Nguyễn Việt Dũng — 2A202602533
+
+- **Vai trò:** Corruption & repair owner.
+- **Phần việc:** Triển khai sáu kịch bản corruption có tính xác định và phục hồi từ raw snapshot.
+- **Đầu ra:** Corrupted/repaired datasets và `data/results/corruption_log.json`.
+- **Cách xác minh:** Corruption log có đủ sáu scenario; clean và repaired dataset giống nhau.
+
+### Nguyễn Hoàng Sơn — 2A202602457
+
+- **Vai trò:** Pipeline integration & evidence owner.
+- **Phần việc:** Điều phối baseline/corruption flow, build ba Chroma collection, chạy evaluation và kiểm tra tính nhất quán artifact.
+- **Đầu ra:** Ba bộ metrics/answers, embedding manifests và báo cáo so sánh ba trạng thái.
+- **Cách xác minh:** Hai entrypoint exit code 0; corrupted metrics suy giảm và repaired metrics trở lại baseline.
+
+## Cam kết nhóm
+
+- Mỗi thành viên chỉ nhận ownership cho phần việc được phân công ở trên.
+- Mọi metric trong báo cáo phải khớp với JSON artifact được pipeline sinh ra.
+- Không commit `.env`, API key, token hoặc secret.
+- Mỗi thành viên chịu trách nhiệm có commit của chính mình trên nhánh mặc định `main` trước khi nộp.

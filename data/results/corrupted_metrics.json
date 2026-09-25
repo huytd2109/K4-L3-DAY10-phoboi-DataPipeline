@@ -1,5 +1,5 @@
 {
-  "samples": 5,
+  "samples": 10,
   "retrieval_hit_rate": 0.6,
   "mean_token_f1": 0.8,
   "judge_accuracy": 0.8,

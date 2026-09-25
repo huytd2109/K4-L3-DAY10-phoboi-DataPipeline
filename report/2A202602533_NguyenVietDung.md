@@ -41,7 +41,7 @@ Theo phân công trong `group_report.md`, tôi nhận dữ liệu sạch đã đ
 | Xuất log kiểm toán chi tiết | `data/results/corruption_log.json` | Ghi nhận chi tiết 6 kịch bản và danh sách DOI bị tác động | Kiểm tra file log JSON trong thư mục results |
 | Thực hiện Idempotent Repair | `src/pipelines/corruption_flow.py` | 24 bản ghi sạch được tái sinh từ raw snapshot | So sánh `papers_clean.json` và `papers_clean_repaired.json` |
 
-Output cụ thể mà phần việc của tôi tạo ra là file nhật ký [data/results/corruption_log.json](file:///d:/AI20K_LABS/K4-L3-DAY10-phoboi-DataPipeline/data/results/corruption_log.json) và 2 bộ dữ liệu: dữ liệu lỗi `papers_clean_corrupted.json` và dữ liệu sau phục hồi `papers_clean_repaired.json`. Log kiểm toán ghi nhận chính xác 5 bài báo mới nhất bị loại bỏ, 4 bài bị xóa summary, 4 bài bị chèn nhiễu, 4 bài bị cắt ngắn tiêu đề, 7 bài bị lùi ngày xuất bản về 5 năm trước và 5 bản ghi bị nhân bản để kiểm thử tính duy nhất.
+Output cụ thể mà phần việc của tôi tạo ra là file nhật ký [`data/results/corruption_log.json`](../data/results/corruption_log.json) và 2 bộ dữ liệu: dữ liệu lỗi `papers_clean_corrupted.json` và dữ liệu sau phục hồi `papers_clean_repaired.json`. Log kiểm toán ghi nhận chính xác 5 bài báo mới nhất bị loại bỏ, 4 bài bị xóa summary, 4 bài bị chèn nhiễu, 4 bài bị cắt ngắn tiêu đề, 7 bài bị lùi ngày xuất bản về 5 năm trước và 5 bản ghi bị nhân bản để kiểm thử tính duy nhất.
 
 ## 4. Giải thích phần kỹ thuật đã thực hiện
 

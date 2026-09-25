@@ -23,6 +23,8 @@ def main() -> None:
         settings.paths.clean_json,
         settings.paths.eval_testset,
         settings.paths.baseline_metrics,
+        settings.paths.baseline_quality_report,
+        settings.paths.freshness_report,
     )
     if any(not path.exists() for path in required_baseline):
         run_phase1()

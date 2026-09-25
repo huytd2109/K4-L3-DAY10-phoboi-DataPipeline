@@ -1,6 +1,6 @@
 # Group Report — Day 10: Data Pipeline & Data Observability
 
-> Báo cáo được tổng hợp từ mã nguồn và artifact sinh ra khi chạy pipeline ngày 2026-09-25. Các trường đánh dấu **[CẦN BỔ SUNG]** phải được nhóm xác nhận trước khi nộp.
+> Báo cáo được tổng hợp từ mã nguồn và artifact sinh ra khi chạy pipeline ngày 2026-09-25.
 
 ## 1. Thông tin bài nộp
 
@@ -23,9 +23,9 @@
 
 ## 2. Tóm tắt kết quả
 
-Nhóm đã hoàn thiện pipeline dữ liệu end-to-end cho hệ thống RAG sử dụng nguồn Crossref snapshot gồm 24 bài báo. Pipeline thực hiện bảo toàn raw data, chuẩn hóa schema, tính `age_days`, tạo `text_for_embedding`, kiểm định dữ liệu bằng Great Expectations 1.x, theo dõi Freshness SLA, tạo embedding MiniLM và lập chỉ mục ba collection ChromaDB. Bộ benchmark gồm năm câu hỏi đại diện cho `summary`, `authors`, `date`, `category` và `multi_hop`.
+Nhóm đã hoàn thiện pipeline dữ liệu end-to-end cho hệ thống RAG sử dụng nguồn Crossref snapshot gồm 24 bài báo. Pipeline thực hiện bảo toàn raw data, chuẩn hóa schema, tính `age_days`, tạo `text_for_embedding`, kiểm định dữ liệu bằng Great Expectations 1.x, theo dõi Freshness SLA, tạo embedding MiniLM và lập chỉ mục ba collection ChromaDB. Bộ benchmark gồm 10 câu hỏi thuộc đủ bốn dạng bắt buộc: `summary`, `authors`, `date` và `categories`.
 
-Trên dữ liệu sạch, Retrieval Hit Rate và Mean Token F1 đều đạt 1.0; Quality Gate và Freshness đều đạt. Sáu lỗi có kiểm soát làm Hit Rate giảm xuống 0.6, Token F1 giảm xuống 0.8, Quality Gate thất bại và tỷ lệ stale tăng từ 4.17% lên 29.17%. Sau khi repair từ raw snapshot, toàn bộ 24 bản ghi sạch được tái tạo, các metric trở lại mức baseline và dữ liệu repaired giống hoàn toàn dữ liệu clean. Hạn chế chính là benchmark còn nhỏ và lượt xác minh cuối dùng `LLM_PROVIDER=mock` để tránh phụ thuộc quota mạng; LLM Judge khi đó sử dụng heuristic fallback được ghi rõ trong answer artifacts.
+Trên dữ liệu sạch, Retrieval Hit Rate và Mean Token F1 đều đạt 1.0; Quality Gate và Freshness đều đạt. Sáu lỗi có kiểm soát làm Hit Rate giảm xuống 0.6, Token F1 giảm xuống 0.8, Quality Gate thất bại và tỷ lệ stale tăng từ 4.17% lên 29.17%. Sau khi repair từ raw snapshot, toàn bộ 24 bản ghi sạch được tái tạo, các metric trở lại mức baseline và dữ liệu repaired giống hoàn toàn dữ liệu clean. Benchmark 10 câu đáp ứng rubric nhưng vẫn còn nhỏ so với corpus; lượt xác minh cuối dùng `LLM_PROVIDER=mock` để tránh phụ thuộc quota mạng nên LLM Judge sử dụng heuristic fallback được ghi rõ trong answer artifacts.
 
 ## 3. Kiến trúc và luồng dữ liệu
 
@@ -64,7 +64,7 @@ Crossref REST API hoặc offline snapshot
 
 | Biến/cấu hình | Giá trị sử dụng |
 |---|---|
-| Python | 3.12.10 |
+| Python | 3.13.1 ở lượt xác minh cuối (project hỗ trợ 3.11–3.13) |
 | `LLM_PROVIDER` khi xác minh cuối | `mock` |
 | LLM production support | Gemini, OpenAI, Anthropic, OpenRouter, Ollama, Custom, Mock |
 | Embedding model | `sentence-transformers/all-MiniLM-L6-v2` |
@@ -88,13 +88,13 @@ python -m pip install -e .
 Baseline:
 
 ```bash
-uv run python script/run_phase1.py
+python script/run_phase1.py
 ```
 
 Corruption flow:
 
 ```bash
-uv run python script/run_corruption_flow.py
+python script/run_corruption_flow.py
 ```
 
 ### Kết quả tái hiện
@@ -159,8 +159,8 @@ Document ID được giữ ổn định bằng DOI (`paper_id`). Chroma record I
 
 | Thành phần | Cấu hình thực tế |
 |---|---|
-| Số câu hỏi | 5 |
-| `question_type` | `summary`, `authors`, `date`, `category`, `multi_hop` |
+| Số câu hỏi | 10 |
+| `question_type` | `summary`, `authors`, `date`, `categories` |
 | Ground-truth document ID | DOI lấy trực tiếp từ clean dataframe |
 | Embedding model | `sentence-transformers/all-MiniLM-L6-v2` |
 | Vector store | ChromaDB persistent local |
@@ -182,7 +182,7 @@ Cùng một file test set được sử dụng cho baseline, corrupted và repai
 | Raw response/records | `data/raw/` | Có | Gồm `crossref_response.json` và `crossref_records.json`; đã parse đủ 24 bài báo với 24 DOI duy nhất. |
 | Cleaned dataset | `data/clean/` | Có | Có `papers_clean.csv` và `papers_clean.json`; 24 dòng đã chuẩn hóa, tính `age_days`, khử trùng lặp và tạo `text_for_embedding`. |
 | Embedding manifest/index | `data/embeddings/` | Có | Có manifest cho baseline, corrupted và repaired; sử dụng `sentence-transformers/all-MiniLM-L6-v2`. Vector index được lưu tại `data/chroma/`. |
-| Evaluation set | `data/eval/` | Có | `test_set.json` gồm 5 câu hỏi thuộc các loại `summary`, `authors`, `date`, `category` và `multi_hop`. |
+| Evaluation set | `data/eval/` | Có | `test_set.json` gồm 10 câu hỏi thuộc các loại `summary`, `authors`, `date` và `categories`. |
 | Baseline metrics | `data/results/baseline_metrics.json` | Có | Ghi nhận Retrieval Hit Rate = 1.0000, Mean Token F1 = 1.0000, Judge Accuracy = 1.0000 và Mean Judge Score = 5.0000. |
 | Quality/freshness | `data/quality/` | Có | Baseline Quality Gate đạt 6/6 validations; stale ratio = 4.17%, thấp hơn ngưỡng cảnh báo 25%, nên `is_fresh = true`. |
 | Baseline report | `data/reports/phase1_report.md` | Có | Báo cáo được sinh tự động từ artifact thực tế, gồm thông tin nguồn, metrics, kết quả GX và Freshness SLA. |
@@ -190,9 +190,9 @@ Cùng một file test set được sử dụng cho baseline, corrupted và repai
 
 | Metric | Giá trị | Diễn giải |
 |---|---:|---|
-| `retrieval_hit_rate` | 1.0000 | Cả 5 câu đều retrieve được DOI ground truth |
+| `retrieval_hit_rate` | 1.0000 | Cả 10 câu đều retrieve được DOI ground truth |
 | `mean_token_f1` | 1.0000 | Câu trả lời trùng khớp ground truth theo token |
-| `judge_accuracy` | 1.0000 | 5/5 câu được đánh giá đúng |
+| `judge_accuracy` | 1.0000 | 10/10 câu được đánh giá đúng |
 | `mean_judge_score` | 5.0000 | Điểm trung bình tối đa |
 | Ragas | Skipped | Chỉ chạy khi đặt `RUN_RAGAS=1` |
 
@@ -262,7 +262,7 @@ Hai chuỗi nguyên nhân–bằng chứng chính:
 
 - **Triệu chứng:** `pip install -e .` báo Python 3.14 không thuộc khoảng `>=3.11,<3.14`.
 - **Nguyên nhân:** `.venv` ban đầu được tạo bằng Python 3.14, trong khi project và một số dependency chỉ hỗ trợ đến Python 3.13.
-- **Cách xử lý:** Tạo lại `.venv` bằng Python 3.12.10 và cài package ở editable mode.
+- **Cách xử lý:** Tạo lại `.venv` bằng một phiên bản được hỗ trợ; lượt xác minh cuối dùng Python 3.13.1 và package ở editable mode.
 - **Cách xác minh:** `python --version`, `python -m pip check`, compile toàn bộ source và chạy hai pipeline với exit code 0.
 
 Ngoài ra, lần tải MiniLM đầu tiên cần kết nối Hugging Face. Sau khi model được cache, `HF_HUB_OFFLINE=1` cho phép chạy lại không cần mạng. LLM client được cấu hình timeout 30 giây và tối đa hai retry để tránh treo pipeline khi provider không phản hồi.
@@ -271,7 +271,7 @@ Ngoài ra, lần tải MiniLM đầu tiên cần kết nối Hugging Face. Sau k
 
 | Giới hạn hiện tại | Ảnh hưởng | Hướng cải thiện có thể kiểm chứng |
 |---|---|---|
-| Benchmark chỉ có 5 câu | Chưa đại diện đầy đủ 24 tài liệu | Mở rộng lên ≥20 câu, stratify theo loại và báo cáo metric từng nhóm |
+| Benchmark 10 câu vẫn nhỏ so với corpus 24 tài liệu | Đáp ứng rubric nhưng độ bao phủ còn hạn chế | Mở rộng lên ≥20 câu, stratify theo loại và báo cáo metric từng nhóm |
 | Final verification dùng mock judge | Judge metric dựa trên heuristic fallback | Chạy lại cả ba trạng thái với cùng provider thật và lưu model/config |
 | Snapshot nhỏ và có tính mô phỏng | Chưa phản ánh hết schema drift Crossref | Chạy `REFRESH_SOURCE=true`, lưu timestamp và so sánh live/offline |
 | Chưa có pytest CI | Regression có thể chỉ xuất hiện khi chạy pipeline | Thêm unit/integration tests và GitHub Actions |

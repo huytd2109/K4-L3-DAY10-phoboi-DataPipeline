@@ -121,12 +121,13 @@ class LocalEmbeddingIndex:
         )
 
         manifest_path = embeddings_output_path or settings.paths.embeddings_json
+        portable_persist_path = persist_path.relative_to(settings.paths.project_dir).as_posix()
         write_json(
             manifest_path,
             {
                 "backend": "chroma",
                 "embedding_model": settings.embedding_model,
-                "persist_path": str(persist_path),
+                "persist_path": portable_persist_path,
                 "collection_name": collection_name,
                 "documents": documents,
             },
@@ -145,7 +146,9 @@ class LocalEmbeddingIndex:
             settings=settings,
             collection_name=payload["collection_name"],
             documents=payload["documents"],
-            persist_path=Path(payload["persist_path"]),
+            # Always open the Chroma database belonging to the current clone.
+            # Older manifests may contain an absolute path from another machine.
+            persist_path=settings.paths.chroma_dir,
         )
 
     def search(self, query: str, top_k: int | None = None) -> list[SearchResult]:
