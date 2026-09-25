@@ -17,18 +17,24 @@ def build_llm(settings: Settings, temperature: float = 0.0):
             model=settings.model_name,
             google_api_key=settings.google_api_key,
             temperature=temperature,
+            timeout=30,
+            max_retries=2,
         )
     if provider == "openai":
         return ChatOpenAI(
             model=settings.model_name,
             api_key=settings.openai_api_key,
             temperature=temperature,
+            request_timeout=30,
+            max_retries=2,
         )
     if provider == "anthropic":
         return ChatAnthropic(
             model=settings.model_name,
             api_key=settings.anthropic_api_key,
             temperature=temperature,
+            default_request_timeout=30,
+            max_retries=2,
         )
     if provider == "openrouter":
         return ChatOpenAI(
@@ -36,6 +42,8 @@ def build_llm(settings: Settings, temperature: float = 0.0):
             api_key=settings.openrouter_api_key,
             base_url=settings.openrouter_base_url,
             temperature=temperature,
+            request_timeout=30,
+            max_retries=2,
         )
     if provider == "ollama":
         return ChatOllama(
@@ -49,6 +57,8 @@ def build_llm(settings: Settings, temperature: float = 0.0):
             api_key=settings.custom_llm_api_key or "unused",
             base_url=settings.custom_llm_base_url,
             temperature=temperature,
+            request_timeout=30,
+            max_retries=2,
         )
     if provider == "mock":
         from langchain_core.language_models.fake_chat_models import FakeListChatModel
